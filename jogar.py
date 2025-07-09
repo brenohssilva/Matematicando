@@ -13,7 +13,6 @@ from kivymd.uix.button import MDIconButton
 from kivy.app import App
 
 
-
 #=======================================================================================================================
 # Tela com os jogos do nível Primario (Fundamental I)
 class TelaJogar_Primario(Screen):
@@ -150,6 +149,7 @@ class TelaJogar_Primario(Screen):
     def voltar(self, instance):
         self.manager.current = "seleciona"
 #=======================================================================================================================
+
 
 #=======================================================================================================================
 # Tela com os jogos do nível Fundamental II
@@ -295,6 +295,7 @@ class TelaJogar_Fundamental(Screen):
         self.manager.current = "seleciona"
 #=======================================================================================================================
 
+
 #=======================================================================================================================
 # Tela com os jogos do nível Ensino Médio
 class TelaJogar_Medio(Screen):
@@ -438,6 +439,8 @@ class TelaJogar_Medio(Screen):
 
 
 
+
+#=======================================================================================================================
 #CLASSES ABAIXO SÃO PARA ESCOLHA DO NÍVEL DO MATEMATICANDO
 #Acho que posso simplificar numa única classe que só mudará a variável dificuldade mesmo
 class Primario(Screen):
@@ -547,7 +550,7 @@ class Primario(Screen):
         self.operacao_selecionada = None
 
     def voltar_tela_inicial(self, instance):
-        self.manager.current = "normal"
+        self.manager.current = "primario"
 
     def on_pre_enter(self, *args):
         app = App.get_running_app()
@@ -729,7 +732,7 @@ class Fundamental(Screen):
         self.operacao_selecionada = None
 
     def voltar_tela_inicial(self, instance):
-        self.manager.current = "jogar"
+        self.manager.current = "fundamental"
 
     def toggle_theme(self, *args):
         app = App.get_running_app()
@@ -1002,3 +1005,4 @@ class Medio(Screen):
         app = App.get_running_app()
         if hasattr(self, 'bg_image'):
             self.bg_image.source = "escuro.png" if app.current_theme == "Dark" else "fundoapp.png"
+#=======================================================================================================================

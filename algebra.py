@@ -23,18 +23,24 @@ from kivy.uix.video import Video # Certifique-se de que Video está importado
 
 LabelBase.register(name="Arial", fn_regular="arial.ttf")
 
-# --------------------------- Classes do Jogo Melhoradas ---------------------
+LabelBase.register(name="ComicNeue", fn_regular="ComicNeue-Regular.ttf")
+
+
+CORES_BOTOES = [
+    (59/255, 89/255, 152/255, 1),    # Azul petróleo
+    (76/255, 175/255, 80/255, 1),    # Verde menta
+    (1, 152/255, 0, 1),              # Laranja
+    (156/255, 39/255, 176/255, 1),   # Roxo
+]
 
 class CardBotao(MDCard):
-    """Um Card que funciona como um botão de resposta."""
     def __init__(self, texto, on_press_func, **kwargs):
         super().__init__(**kwargs)
         self.size_hint = (1, None)
-        self.height = dp(50)
-        self.elevation = 8
-        self.radius = [15]
-        # Usa a cor primária do tema do app
-        self.md_bg_color = App.get_running_app().theme_cls.primary_color
+        self.height = dp(60)
+        self.elevation = 10
+        self.radius = [20]
+        self.md_bg_color = random.choice(CORES_BOTOES)
         self.texto = texto
         self.on_press_func = on_press_func
         self.padding = dp(10)
@@ -43,23 +49,21 @@ class CardBotao(MDCard):
         self.label = MDLabel(
             text=texto,
             halign="center",
-            font_style="H6",
+            font_style="H5",
             theme_text_color="Custom",
-            text_color=(1, 1, 1, 1) # Texto branco fica bom na maioria das cores primárias
+            text_color=(1, 1, 1, 1),
+            font_name="ComicNeue"
         )
         self.add_widget(self.label)
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
-            # A animação de ripple já é gerenciada pelo KivyMD
-            self.on_press_func(int(self.texto))
+            self.on_press_func(self.texto)
             return True
         return super().on_touch_down(touch)
 
 
-
 class AlgebraGameScreen(Screen):
-    """A tela principal do jogo de álgebra."""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.pergunta_atual = 1
@@ -70,123 +74,120 @@ class AlgebraGameScreen(Screen):
         self.tempo_inicial = 30
         self.tempo_restante = 30
         self.timer_event = None
-        # Layout base com imagem de fundo
+
         self.layout = FloatLayout()
         self.bg_image = Image(source='fundoapp.png', allow_stretch=True, keep_ratio=False)
         self.layout.add_widget(self.bg_image)
 
-        # Botão de voltar
         self.back_button = MDIconButton(
             icon='arrow-left',
             pos_hint={'x': 0, 'top': 1},
             on_release=self.voltar,
             theme_text_color="Custom",
-            icon_color=(1,1,1,1) # Cor branca para melhor visibilidade no fundo
+            icon_color=(1, 1, 1, 1)
         )
         self.layout.add_widget(self.back_button)
 
-        # Botão de configurações (tema)
         self.theme_button = MDIconButton(
             icon='cog',
             pos_hint={'right': 1, 'top': 1},
             on_release=self.toggle_theme,
             theme_text_color="Custom",
-            icon_color=(1,1,1,1) # Cor branca para melhor visibilidade no fundo
+            icon_color=(1, 1, 1, 1)
         )
         self.layout.add_widget(self.theme_button)
 
-        # Layout principal vertical
         self.main_layout = BoxLayout(
             orientation='vertical',
-            spacing=dp(15),
-            padding=dp(20),
+            spacing=dp(20),
+            padding=dp(25),
             size_hint=(1, 1)
         )
 
-        # Layout do topo (Placar e Progresso)
-        self.top_layout = BoxLayout(
-            size_hint_y=None,
-            height=dp(40)
-        )
+        self.top_layout = BoxLayout(size_hint_y=None, height=dp(40))
         self.progresso_label = MDLabel(
-            text=f"Pergunta: {self.pergunta_atual}/{self.total_perguntas}",
+            text="Pergunta: 1/10",
             halign="left",
             font_style="H6",
             theme_text_color="Custom",
-            text_color=(1,1,1,1)
+            text_color=(53/255, 79/255, 117/255, 1),
+            font_name="ComicNeue"
         )
         self.placar_label = MDLabel(
-            text=f"Acertos: {self.acertos}  Erros: {self.erros}",
+            text="Acertos: 0  Erros: 0",
             halign="right",
             font_style="H6",
             theme_text_color="Custom",
-            text_color=(1,1,1,1)
+            text_color=(53/255, 79/255, 117/255, 1),
+            font_name="ComicNeue"
         )
         self.top_layout.add_widget(self.progresso_label)
         self.top_layout.add_widget(self.placar_label)
         self.main_layout.add_widget(self.top_layout)
 
-        # Layout do Timer
         self.timer_layout = BoxLayout(orientation='vertical', size_hint_y=None, height=dp(50))
         self.timer_label = MDLabel(
             text="Tempo: 00:30",
             halign="center",
             font_style="H6",
             theme_text_color="Custom",
-            text_color=(1, 0, 0, 1) # Vermelho para urgência
+            text_color=(1, 0, 0, 1),
+            font_name="ComicNeue"
         )
         self.progress_bar = MDProgressBar(value=100, max=100)
         self.timer_layout.add_widget(self.timer_label)
         self.timer_layout.add_widget(self.progress_bar)
         self.main_layout.add_widget(self.timer_layout)
 
-        # Card da Equação
         self.equation_card = MDCard(
             size_hint=(1, 0.2),
             elevation=10,
-            padding=dp(20),
             radius=[20],
+            padding=dp(20),
+            md_bg_color=(1, 1, 1, 0.85)
         )
         self.equation_label = MDLabel(
             text="2x = 24 - 14",
             font_style="H4",
-            halign="center"
+            halign="center",
+            theme_text_color="Custom",
+            text_color=(53/255, 79/255, 117/255, 1),
+            font_name="ComicNeue"
         )
         self.equation_card.add_widget(self.equation_label)
         self.main_layout.add_widget(self.equation_card)
 
-        # Card da Resposta
         self.resposta_card = MDCard(
             size_hint=(1, 0.15),
             elevation=6,
             padding=dp(15),
             radius=[15],
+            md_bg_color=(250/255, 248/255, 239/255, 1)
         )
         self.resposta_label = MDLabel(
             text="x = _____",
             font_style="H5",
             halign="center",
-            font_name="Arial"
+            theme_text_color="Custom",
+            text_color=(53/255, 79/255, 117/255, 1),
+            font_name="ComicNeue"
         )
         self.resposta_card.add_widget(self.resposta_label)
         self.main_layout.add_widget(self.resposta_card)
 
-        # Layouts dos Botões de Resposta
-        self.botoes_layout_1 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(50))
-        self.botoes_layout_2 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(50))
+        self.botoes_layout_1 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(60))
+        self.botoes_layout_2 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(60))
         self.main_layout.add_widget(self.botoes_layout_1)
         self.main_layout.add_widget(self.botoes_layout_2)
 
-        # Timer geral do jogo
         self.tempo_total = 0
         self.tempo_total_event = None
         self.dificuldade = "Fundamental"
 
-        # O botão de ajuda agora deve chamar a nova função:
         self.help_button = MDFloatingActionButton(
-            icon="play-circle-outline", # Ícone de play fica mais adequado
+            icon="play-circle-outline",
             pos_hint={'right': 0.55, 'top': 0.97},
-            on_release=self.mostrar_exemplo_animado # <<< MUDANÇA: Chama o novo método
+            on_release=self.mostrar_exemplo_animado
         )
         self.layout.add_widget(self.help_button)
 

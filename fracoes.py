@@ -21,38 +21,32 @@ import os
 from kivymd.uix.dialog import MDDialog
 from kivy.uix.video import Video
 
-
+from kivy.core.text import LabelBase
+LabelBase.register(name="ComicNeue", fn_regular="ComicNeue-Regular.ttf")
 # =============================================================================
 # CLASSE DE DEPENDÊNCIA (Botão customizado)
 # =============================================================================
-class CardBotao(MDCard):
-    """Um Card que funciona como um botão de resposta."""
+from kivymd.uix.button import MDRaisedButton
+import random
+
+class CardBotao(MDRaisedButton):
     def __init__(self, texto, on_press_func, **kwargs):
-        super().__init__(**kwargs)
-        self.size_hint = (1, None)
-        self.height = dp(50)
-        self.elevation = 8
-        self.radius = [15]
-        # Usa a cor primária do tema do app
-        self.md_bg_color = App.get_running_app().theme_cls.primary_color
-        self.texto = texto
-        self.on_press_func = on_press_func
-        self.padding = dp(10)
-        self.ripple_behavior = True
-
-        self.label = MDLabel(
+        super().__init__(
             text=texto,
-            halign="center",
-            font_style="H6",
-            theme_text_color="ContrastParentBackground"
+            on_release=lambda x: on_press_func(texto),
+            size_hint=(1, 1),
+            font_size="20sp",
+            md_bg_color=random.choice([
+                (1, 152/255, 0, 1),                 # laranja vibrante
+                (139/255, 195/255, 74/255, 1),      # verde limão pastel
+                (167/255, 199/255, 231/255, 1),     # azul pastel
+                (244/255, 169/255, 168/255, 1)      # rosa claro
+            ]),
+            text_color=(1, 1, 1, 1),
+            font_name="ComicNeue",
+            elevation=6,
+            **kwargs
         )
-        self.add_widget(self.label)
-
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
-            self.on_press_func(self.texto)
-            return True
-        return super().on_touch_down(touch)
 
 
 # =============================================================================
@@ -69,37 +63,36 @@ class FracoesGameScreen(Screen):
         self.resposta_correta = ""
 
         self.layout = FloatLayout()
-        self.bg_image = Image(
-            source='fundoapp.png',
-            allow_stretch=True,
-            keep_ratio=False)
+        self.bg_image = Image(source='fundoapp.png', allow_stretch=True, keep_ratio=False)
         self.layout.add_widget(self.bg_image)
 
-        self.back_button = MDIconButton(
-            icon='arrow-left',
-            pos_hint={'x': 0, 'top': 1},
-            on_release=self.voltar)
+        self.back_button = MDIconButton(icon='arrow-left', pos_hint={'x': 0, 'top': 1}, on_release=self.voltar)
         self.layout.add_widget(self.back_button)
 
         self.main_layout = BoxLayout(
             orientation='vertical',
-            spacing=dp(15),
-            padding=dp(20))
+            spacing=dp(20),
+            padding=[dp(30), dp(20), dp(30), dp(20)],
+            size_hint=(1, 1)
+        )
 
-        self.top_layout = BoxLayout(
-            size_hint_y=None,
-            height=dp(40))
+        self.top_layout = BoxLayout(size_hint_y=None, height=dp(40))
 
         self.progresso_label = MDLabel(
             font_style="H6",
+            halign="left",
             theme_text_color="Custom",
-            text_color=(1,1,1,1))
+            text_color=(53/255, 79/255, 117/255, 1),
+            font_name="ComicNeue"
+        )
 
         self.placar_label = MDLabel(
             font_style="H6",
             halign="right",
             theme_text_color="Custom",
-            text_color=(1,1,1,1))
+            text_color=(53/255, 79/255, 117/255, 1),
+            font_name="ComicNeue"
+        )
 
         self.top_layout.add_widget(self.progresso_label)
         self.top_layout.add_widget(self.placar_label)
@@ -107,61 +100,49 @@ class FracoesGameScreen(Screen):
 
         self.question_card = MDCard(
             size_hint=(1, 0.45),
-            elevation=10,
+            elevation=8,
+            radius=[30],
             padding=dp(10),
-            radius=[20],
-            md_bg_color=(1, 0, 1, 0)
+            md_bg_color=(1, 1, 1, 0.85)
         )
-
-        self.pie_chart_image = Image(
-            allow_stretch=True
-        )
-
+        self.pie_chart_image = Image(allow_stretch=True)
         self.question_card.add_widget(self.pie_chart_image)
         self.main_layout.add_widget(self.question_card)
 
         self.resposta_card = MDCard(
             size_hint=(1, 0.15),
-            elevation=6,
-            radius=[15],
-            md_bg_color=(1, 0, 1, 0)
+            elevation=10,
+            radius=[25],
+            md_bg_color=(250/255, 248/255, 239/255, 1)
         )
-
         self.resposta_label = MDLabel(
             text="Qual é a fração?",
+            halign="center",
             font_style="H5",
-            halign="center"
+            theme_text_color="Custom",
+            text_color=(53/255, 79/255, 117/255, 1),
+            font_name="ComicNeue"
         )
-
         self.resposta_card.add_widget(self.resposta_label)
         self.main_layout.add_widget(self.resposta_card)
 
-        self.botoes_layout_1 = BoxLayout(
-            spacing=dp(12),
-            size_hint_y=None,
-            height=dp(50)
-        )
-
-        self.botoes_layout_2 = BoxLayout(
-            spacing=dp(12),
-            size_hint_y=None,
-            height=dp(50)
-        )
+        self.botoes_layout_1 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(60))
+        self.botoes_layout_2 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(60))
         self.main_layout.add_widget(self.botoes_layout_1)
         self.main_layout.add_widget(self.botoes_layout_2)
 
         self.help_button = MDFloatingActionButton(
             icon="play-circle-outline",
-            pos_hint={'right': 0.5, 'top': 0.95},
+            pos_hint={'right': 0.5, 'top': 0.98},
             on_release=self.mostrar_exemplo_animado
         )
         self.layout.add_widget(self.help_button)
 
-
         self.layout.add_widget(self.main_layout)
         self.add_widget(self.layout)
         self.representacoes = ["pizza", "barra", "hexagono"]
-        self.dificuldade = "Primario"  # valor padrão
+        self.dificuldade = "Primario"
+
 
     def definir_dificuldade(self, dificuldade):
         self.dificuldade = dificuldade
