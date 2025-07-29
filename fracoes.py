@@ -16,19 +16,16 @@ import math
 import matplotlib.pyplot as plt
 from fractions import Fraction
 from PIL import Image as PILImage, ImageDraw, ImageFont
-import random
 import os
 from kivymd.uix.dialog import MDDialog
 from kivy.uix.video import Video
-
+import random
 from kivy.core.text import LabelBase
 LabelBase.register(name="ComicNeue", fn_regular="ComicNeue-Regular.ttf")
+
+
 # =============================================================================
 # CLASSE DE DEPENDÊNCIA (Botão customizado)
-# =============================================================================
-from kivymd.uix.button import MDRaisedButton
-import random
-
 class CardBotao(MDRaisedButton):
     def __init__(self, texto, on_press_func, **kwargs):
         super().__init__(
@@ -37,16 +34,19 @@ class CardBotao(MDRaisedButton):
             size_hint=(1, 1),
             font_size="20sp",
             md_bg_color=random.choice([
-                (1, 152/255, 0, 1),                 # laranja vibrante
-                (139/255, 195/255, 74/255, 1),      # verde limão pastel
-                (167/255, 199/255, 231/255, 1),     # azul pastel
-                (244/255, 169/255, 168/255, 1)      # rosa claro
+                (1.0, 111/255, 64/255, 1),      # Laranja queimado vivo
+                (0.36, 0.8, 0.96, 1),           # Azul claro brilhante
+                (0.85, 0.53, 0.97, 1),          # Rosa roxo neon suave
+                (0.59, 0.43, 0.91, 1),          # Roxo pastel vibrante
             ]),
             text_color=(1, 1, 1, 1),
             font_name="ComicNeue",
             elevation=6,
             **kwargs
         )
+#= ============================================================================
+
+
 
 
 # =============================================================================
@@ -103,7 +103,8 @@ class FracoesGameScreen(Screen):
             elevation=8,
             radius=[30],
             padding=dp(10),
-            md_bg_color=(1, 1, 1, 0.85)
+            md_bg_color=(0.85, 0.53, 0.97, 1)
+
         )
         self.pie_chart_image = Image(allow_stretch=True)
         self.question_card.add_widget(self.pie_chart_image)
@@ -113,7 +114,7 @@ class FracoesGameScreen(Screen):
             size_hint=(1, 0.15),
             elevation=10,
             radius=[25],
-            md_bg_color=(250/255, 248/255, 239/255, 1)
+            md_bg_color=(0.36, 0.8, 0.96, 1)
         )
         self.resposta_label = MDLabel(
             text="Qual é a fração?",
@@ -133,7 +134,7 @@ class FracoesGameScreen(Screen):
 
         self.help_button = MDFloatingActionButton(
             icon="play-circle-outline",
-            pos_hint={'right': 0.5, 'top': 0.98},
+            pos_hint={'right': 0.55, 'top': 0.985},
             on_release=self.mostrar_exemplo_animado
         )
         self.layout.add_widget(self.help_button)
@@ -148,7 +149,9 @@ class FracoesGameScreen(Screen):
         self.dificuldade = dificuldade
 
     def on_pre_enter(self, *args):
+        print(f"[DEBUG on_pre_enter] Dificuldade: {self.dificuldade}")
         self.reiniciar_jogo()
+
 
     def reiniciar_jogo(self):
         self.pergunta_atual = 1
@@ -214,10 +217,14 @@ class FracoesGameScreen(Screen):
         return caminho_imagem
 
     def gerar_pergunta(self):
-        if self.dificuldade == "Primario":
+        print(f"[DEBUG] Dificuldade atual: {self.dificuldade}")
+        if self.dificuldade == "Primário":
             self.gerar_pergunta_primario()
         elif self.dificuldade == "Fundamental":
             self.gerar_pergunta_fundamental()
+        else:
+            print("[ERRO] Dificuldade não reconhecida!")
+
 
     def gerar_pergunta_fundamental(self):
         self.placar_label.text = f"Acertos: {self.acertos}  Erros: {self.erros}"

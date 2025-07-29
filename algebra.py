@@ -27,10 +27,10 @@ LabelBase.register(name="ComicNeue", fn_regular="ComicNeue-Regular.ttf")
 
 
 CORES_BOTOES = [
-    (59/255, 89/255, 152/255, 1),    # Azul petróleo
-    (76/255, 175/255, 80/255, 1),    # Verde menta
-    (1, 152/255, 0, 1),              # Laranja
-    (156/255, 39/255, 176/255, 1),   # Roxo
+    (1.0, 111/255, 64/255, 1),      # Laranja queimado vivo
+    (0.36, 0.8, 0.96, 1),           # Azul claro brilhante
+    (0.85, 0.53, 0.97, 1),          # Rosa roxo neon suave
+    (0.59, 0.43, 0.91, 1),          # Roxo pastel vibrante
 ]
 
 class CardBotao(MDCard):
@@ -139,12 +139,13 @@ class AlgebraGameScreen(Screen):
         self.timer_layout.add_widget(self.progress_bar)
         self.main_layout.add_widget(self.timer_layout)
 
+        # Card da equação com lavanda translúcido
         self.equation_card = MDCard(
             size_hint=(1, 0.2),
             elevation=10,
             radius=[20],
             padding=dp(20),
-            md_bg_color=(1, 1, 1, 0.85)
+            md_bg_color=(0.85, 0.8, 1, 0.3)  # lavanda translúcido
         )
         self.equation_label = MDLabel(
             text="2x = 24 - 14",
@@ -157,12 +158,13 @@ class AlgebraGameScreen(Screen):
         self.equation_card.add_widget(self.equation_label)
         self.main_layout.add_widget(self.equation_card)
 
+        # Card da resposta com lavanda translúcido
         self.resposta_card = MDCard(
             size_hint=(1, 0.15),
             elevation=6,
             padding=dp(15),
             radius=[15],
-            md_bg_color=(250/255, 248/255, 239/255, 1)
+            md_bg_color=(0.85, 0.8, 1, 0.3)  # lavanda translúcido
         )
         self.resposta_label = MDLabel(
             text="x = _____",
@@ -196,11 +198,151 @@ class AlgebraGameScreen(Screen):
 
         Clock.schedule_once(lambda dt: self.gerar_equacao(), 0.5)
 
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            self.on_press_func(self.texto)
+            return True
+        return super().on_touch_down(touch)
+
+
+class AlgebraGameScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.pergunta_atual = 1
+        self.total_perguntas = 10
+        self.acertos = 0
+        self.erros = 0
+        self.resposta_correta = None
+        self.tempo_inicial = 30
+        self.tempo_restante = 30
+        self.timer_event = None
+
+        self.layout = FloatLayout()
+        self.bg_image = Image(source='fundoapp.png', allow_stretch=True, keep_ratio=False)
+        self.layout.add_widget(self.bg_image)
+
+        self.back_button = MDIconButton(
+            icon='arrow-left',
+            pos_hint={'x': 0, 'top': 1},
+            on_release=self.voltar,
+            theme_text_color="Custom",
+            icon_color=(1, 1, 1, 1)
+        )
+        self.layout.add_widget(self.back_button)
+
+        self.theme_button = MDIconButton(
+            icon='cog',
+            pos_hint={'right': 1, 'top': 1},
+            on_release=self.toggle_theme,
+            theme_text_color="Custom",
+            icon_color=(1, 1, 1, 1)
+        )
+        self.layout.add_widget(self.theme_button)
+
+        self.main_layout = BoxLayout(
+            orientation='vertical',
+            spacing=dp(20),
+            padding=dp(25),
+            size_hint=(1, 1)
+        )
+
+        self.top_layout = BoxLayout(size_hint_y=None, height=dp(40))
+        self.progresso_label = MDLabel(
+            text="Pergunta: 1/10",
+            halign="left",
+            font_style="H6",
+            theme_text_color="Custom",
+            text_color=(1, 1, 1, 1),
+            font_name="ComicNeue"
+        )
+        self.placar_label = MDLabel(
+            text="Acertos: 0  Erros: 0",
+            halign="right",
+            font_style="H6",
+            theme_text_color="Custom",
+            text_color=(1, 1, 1, 1),
+            font_name="ComicNeue"
+        )
+        self.top_layout.add_widget(self.progresso_label)
+        self.top_layout.add_widget(self.placar_label)
+        self.main_layout.add_widget(self.top_layout)
+
+        self.timer_layout = BoxLayout(orientation='vertical', size_hint_y=None, height=dp(50))
+        self.timer_label = MDLabel(
+            text="Tempo: 00:30",
+            halign="center",
+            font_style="H6",
+            theme_text_color="Custom",
+            text_color=(1, 0, 0, 1),
+            font_name="ComicNeue"
+        )
+        self.progress_bar = MDProgressBar(value=100, max=100)
+        self.timer_layout.add_widget(self.timer_label)
+        self.timer_layout.add_widget(self.progress_bar)
+        self.main_layout.add_widget(self.timer_layout)
+
+        self.equation_card = MDCard(
+            size_hint=(1, 0.2),
+            elevation=10,
+            radius=[20],
+            padding=dp(20),
+            md_bg_color=(0.36, 0.8, 0.96, 1)
+        )
+
+        self.equation_label = MDLabel(
+            text="2x = 24 - 14",
+            font_style="H4",
+            halign="center",
+            theme_text_color="Custom",
+            text_color=(53/255, 79/255, 117/255, 1),
+            font_name="ComicNeue"
+        )
+        self.equation_card.add_widget(self.equation_label)
+        self.main_layout.add_widget(self.equation_card)
+
+        self.resposta_card = MDCard(
+            size_hint=(1, 0.15),
+            elevation=6,
+            padding=dp(15),
+            radius=[15],
+            md_bg_color=(0.85, 0.8, 1, 0.3)
+        )
+
+        self.resposta_label = MDLabel(
+            text="x = _____",
+            font_style="H5",
+            halign="center",
+            theme_text_color="Custom",
+            text_color=(1,1,1,1),
+            font_name="ComicNeue"
+        )
+        self.resposta_card.add_widget(self.resposta_label)
+        self.main_layout.add_widget(self.resposta_card)
+
+        self.botoes_layout_1 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(60))
+        self.botoes_layout_2 = BoxLayout(spacing=dp(12), size_hint_y=None, height=dp(60))
+        self.main_layout.add_widget(self.botoes_layout_1)
+        self.main_layout.add_widget(self.botoes_layout_2)
+
+        self.tempo_total = 0
+        self.tempo_total_event = None
+        self.dificuldade = "Fundamental"
+
+        self.help_button = MDFloatingActionButton(
+            icon="play-circle-outline",
+            pos_hint={'right': 0.55, 'top': 0.97},
+            on_release=self.mostrar_exemplo_animado
+        )
+        self.layout.add_widget(self.help_button)
+
+        self.layout.add_widget(self.main_layout)
+        self.add_widget(self.layout)
+
+        Clock.schedule_once(lambda dt: self.gerar_equacao(), 0.5)
+
     def on_pre_enter(self, *args):
         """Reinicia o estado do jogo sempre que a tela é exibida."""
         self.reiniciar_jogo()
-        # Atualiza as cores com base no tema atual do app
-        self.update_colors_from_theme()
 
     def reiniciar_jogo(self):
         self.pergunta_atual = 1
@@ -307,12 +449,16 @@ class AlgebraGameScreen(Screen):
         # Atualiza progresso
         self.progresso_label.text = f"Pergunta: {self.pergunta_atual}/{self.total_perguntas}"
 
-    def verificar_resposta(self, valor):
+    def verificar_resposta(self, resposta_str):
         if self.timer_event:
             self.timer_event.cancel()
             self.timer_event = None
+        try:
+            resposta_selecionada = int(resposta_str)
+        except ValueError:
+            resposta_selecionada = None
 
-        if valor == self.resposta_correta:
+        if resposta_selecionada == self.resposta_correta:
             self.acertos += 1
             self.resposta_label.text = "Acertou! ✔️"
             self.resposta_card.md_bg_color = (0.2, 0.8, 0.2, 1)
@@ -325,17 +471,15 @@ class AlgebraGameScreen(Screen):
         self.pergunta_atual += 1
 
         if self.pergunta_atual > self.total_perguntas:
-            # Jogo acabou, chama a tela de parabéns
-            Clock.schedule_once(lambda dt: self.mostrar_parabens(), 1.5)
+            Clock.schedule_once(lambda dt: self.encerrar_jogo(), 1.5)
         else:
-            # Próxima pergunta
             Clock.schedule_once(lambda dt: self.gerar_equacao(), 1.5)
+
 
     def contar_erro_por_tempo(self):
         if self.timer_event:
             self.timer_event.cancel()
             self.timer_event = None
-
         self.erros += 1
         self.resposta_label.text = f"Tempo esgotado! ❌"
         self.resposta_card.md_bg_color = (0.9, 0.3, 0.3, 1)
@@ -343,20 +487,11 @@ class AlgebraGameScreen(Screen):
         self.pergunta_atual += 1
 
         if self.pergunta_atual > self.total_perguntas:
-            Clock.schedule_once(lambda dt: self.mostrar_parabens(), 1.5)
+            Clock.schedule_once(lambda dt: self.encerrar_jogo(), 1.5)
         else:
             Clock.schedule_once(lambda dt: self.gerar_equacao(), 1.5)
 
-    def mostrar_parabens(self):
-        self.main_layout.clear_widgets()
-        parabens_label = MDLabel(
-            text="Parabéns!\nVocê concluiu o desafio!",
-            halign="center", font_style="H4", theme_text_color="Custom",
-            text_color=(1,1,1,1), pos_hint={"center_y": 0.5}
-        )
-        self.main_layout.add_widget(parabens_label)
-        # Após mostrar parabéns, encerra o jogo
-        Clock.schedule_once(lambda dt: self.encerrar_jogo(), 2)
+
 
     def encerrar_jogo(self):
         if self.tempo_total_event:
@@ -391,6 +526,7 @@ class AlgebraGameScreen(Screen):
         if self.tempo_restante <= 5: self.progress_bar.color = [1, 0, 0, 1]
         elif percentual <= 50: self.progress_bar.color = [1, 1, 0, 1]
         else: self.progress_bar.color = [0, 1, 0, 1]
+        print(f"[DEBUG] Tempo restante: {self.tempo_restante}")
 
         if self.tempo_restante == 0: self.contar_erro_por_tempo()
 
@@ -462,7 +598,7 @@ class AlgebraGameScreen(Screen):
             self.timer_event = None
 
         self.timer_event = Clock.schedule_interval(self.atualizar_timer, 1)
-
+        print("[DEBUG] Timer agendado para atualizar_timer")
 
     def mostrar_exemplo_animado(self, *args):
         if self.timer_event:
