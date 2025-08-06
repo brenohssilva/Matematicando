@@ -1,4 +1,4 @@
-from manim import *
+from main import *
 
 class IntroducaoFracao(Scene):
     def construct(self):

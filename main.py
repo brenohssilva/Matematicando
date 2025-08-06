@@ -13,4 +13,4 @@ class MobileApp(MDApp):
         return gui.build_gui()
 
 if __name__ == "__main__":
-    MobileApp().run()
+ MobileApp().run()

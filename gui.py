@@ -115,6 +115,8 @@ class TelaInicial(Screen, ThemeManagerMixin):
 
         self.add_widget(layout)
 
+ 
+
     def setup_background(self, layout):
         background = Image(
             source="fundoapp.png",  # imagem do quadro
@@ -130,6 +132,7 @@ class TelaInicial(Screen, ThemeManagerMixin):
             label.text = texto[:i]
             Clock.schedule_once(lambda dt: self.digita_texto(label, texto, i+1), 0.05)
 
+#Som botao
     def tocar_som_giz(self):
         som = SoundLoader.load("giz_riscando.wav")
         if som:
@@ -197,7 +200,10 @@ class Seleciona_Nivel(Screen, ThemeManagerMixin):
         )
         layout.add_widget(btn_medio)
 
+# Variável para controlar o estado do som (ligado/desligado)
+        self.is_sound_on = True
 
+        #Botao de voltar
         back_button = MDIconButton(
             icon='arrow-left',
             pos_hint={'x': 0, 'top': 1},
@@ -206,6 +212,17 @@ class Seleciona_Nivel(Screen, ThemeManagerMixin):
         layout.add_widget(back_button)
 
         self.add_widget(layout)
+
+   # Botão de som com cor e tamanho ajustados
+        self.sound_button = MDIconButton(
+            icon='volume-high',
+            pos_hint={'x': 0.9, 'top': 1},
+            theme_text_color="Custom",
+            text_color=(1, 1, 1, 1), # Cor branca
+            icon_size=35, # Tamanho do ícone em pixels (ajuste como preferir)
+            on_release=lambda x: self.toggle_sound_icon()
+        )
+        layout.add_widget(self.sound_button) 
 
     def animate_title(self, label):
         anim = Animation(opacity=0.7, duration=1) + Animation(opacity=1, duration=1)
@@ -251,6 +268,14 @@ class Seleciona_Nivel(Screen, ThemeManagerMixin):
     def voltar(self, instance):
         self.manager.transition = SlideTransition(direction="right", duration=0.4)
         self.manager.current = "inicial"
+
+    def toggle_sound_icon(self):
+        if self.sound_button.icon == 'volume-high':
+            self.sound_button.icon = 'volume-off'
+            print("Som Desligado")
+        else:
+            self.sound_button.icon = 'volume-high'
+            print("Som Ligado")
 
 
 
