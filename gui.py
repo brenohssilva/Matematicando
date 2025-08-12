@@ -54,16 +54,16 @@ class TelaInicial(Screen, ThemeManagerMixin):
         self.setup_background(layout)
 
         app = App.get_running_app()
-        # Inicializa o estado global de som se ainda não foi feito
+        
         if not hasattr(app, 'sound_on'):
             app.sound_on = True
 
-        # Título animado com fundo estilizado combinando com o novo fundo roxo/azul
+        
         self.title_card = MDCard(
             orientation="vertical",
             size_hint=(0.85, None),
             height=110,
-            md_bg_color=(60/255, 20/255, 100/255, 0.65),  # Roxo escuro translúcido
+            md_bg_color=(60/255, 20/255, 100/255, 0.65),  
             radius=[24],
             elevation=12,
             padding=[20, 10, 20, 10],
@@ -74,9 +74,9 @@ class TelaInicial(Screen, ThemeManagerMixin):
             text="",
             halign="center",
             theme_text_color="Custom",
-            text_color=(1, 0.95, 0.8, 1),  # Amarelo claro/quente
+            text_color=(1, 0.95, 0.8, 1),  
             font_style="H3",
-            font_name="ComicNeue",  # fonte personalizada já usada por você
+            font_name="ComicNeue",  
             size_hint=(1, 1),
             valign="middle",
         )
@@ -113,7 +113,7 @@ class TelaInicial(Screen, ThemeManagerMixin):
 
     def setup_background(self, layout):
         background = Image(
-            source="fundoapp.png",  # imagem do quadro
+            source="fundoapp.png",  
             allow_stretch=True,
             keep_ratio=False,
             size_hint=(1, 1),
@@ -126,7 +126,7 @@ class TelaInicial(Screen, ThemeManagerMixin):
             label.text = texto[:i]
             Clock.schedule_once(lambda dt: self.digita_texto(label, texto, i+1), 0.05)
 
-    # Método chamado quando a tela se torna a tela atual
+    
     def on_enter(self, *args):
         app = App.get_running_app()
         # Carrega o som de fundo se ainda não foi carregado
@@ -169,7 +169,7 @@ class ImageButton(ButtonBehavior, Image):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.allow_stretch = True
-        self.keep_ratio = True  # ou False, se quiser preencher total
+        self.keep_ratio = True  
 
 # classe do quadro
 class Seleciona_Nivel(Screen, ThemeManagerMixin):
@@ -219,8 +219,8 @@ class Seleciona_Nivel(Screen, ThemeManagerMixin):
         # Variável para controlar o estado do som (ligado/desligado)
         # Inicializa o estado do som do aplicativo globalmente
         app = App.get_running_app()
-        if not hasattr(app, 'sound_on'): # Redundante, mas mantém a robustez
-            app.sound_on = True # Define o som como ligado por padrão
+        if not hasattr(app, 'sound_on'): 
+            app.sound_on = True 
         self.sound_click = SoundLoader.load('stardew_valley.mp3') # Carrega o som do clique do botão
 
         # Botão de voltar
@@ -233,12 +233,12 @@ class Seleciona_Nivel(Screen, ThemeManagerMixin):
 
         # Botão de som com cor e tamanho ajustados
         self.sound_button = MDIconButton(
-            icon='volume-high' if app.sound_on else 'volume-off', # Define o ícone inicial com base no estado global
+            icon='volume-high' if app.sound_on else 'volume-off', 
             pos_hint={'x': 0.93, 'top': 1},
             theme_text_color="Custom",
-            text_color=(1, 1, 1, 1), # Cor branca
+            text_color=(1, 1, 1, 1), 
             icon_size=35, # Tamanho do ícone em pixels (ajuste como preferir)
-            on_release=self.toggle_sound_icon # Chama o método toggle_sound_icon
+            on_release=self.toggle_sound_icon 
         )
         layout.add_widget(self.sound_button)
 
