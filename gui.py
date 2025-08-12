@@ -10,6 +10,7 @@ from kivy.core.audio import SoundLoader
 from kivymd.uix.card import MDCard
 from kivy.clock import Clock
 from kivy.uix.behaviors import ButtonBehavior
+
 LabelBase.register(name="Lemonada", fn_regular="arial.ttf")
 LabelBase.register(name="ComicNeue", fn_regular="ComicNeue-Regular.ttf")
 
@@ -18,15 +19,6 @@ class ThemeManagerMixin:
     def setup_background_and_theme_button(self, layout):
         self.bg_image = Image(source='fundoapp.png', allow_stretch=True, keep_ratio=False)
         layout.add_widget(self.bg_image)
-
-        self.theme_button = MDIconButton(
-            icon="cog",
-            pos_hint={"right": 1, "top": 1},
-            theme_text_color="Custom",
-            text_color=(1, 1, 1, 1),
-            on_release=self.toggle_theme
-        )
-        layout.add_widget(self.theme_button)
 
     def toggle_theme(self, *args):
         app = App.get_running_app()
@@ -45,7 +37,6 @@ class ThemeManagerMixin:
                     screen.bg_image.source = "escuro.png" if theme == "Dark" else "fundoapp.png"
 
 
-
 class BotaoImagem(ButtonBehavior, Image):
     def __init__(self, imagem, on_press_action, **kwargs):
         super().__init__(**kwargs)
@@ -55,11 +46,17 @@ class BotaoImagem(ButtonBehavior, Image):
         self.size_hint = (0.4, 0.12)
         self.on_press_action = on_press_action
         self.bind(on_release=self.on_press_action)
+
 class TelaInicial(Screen, ThemeManagerMixin):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         layout = FloatLayout()
         self.setup_background(layout)
+
+        app = App.get_running_app()
+        # Inicializa o estado global de som se ainda não foi feito
+        if not hasattr(app, 'sound_on'):
+            app.sound_on = True
 
         # Título animado com fundo estilizado combinando com o novo fundo roxo/azul
         self.title_card = MDCard(
@@ -88,7 +85,6 @@ class TelaInicial(Screen, ThemeManagerMixin):
         layout.add_widget(self.title_card)
         self.digita_texto(self.title_label, "MATEMATICANDO")
 
-
         # Botão JOGAR
         botao_jogar = BotaoImagem(
             imagem="jogar.png",
@@ -115,8 +111,6 @@ class TelaInicial(Screen, ThemeManagerMixin):
 
         self.add_widget(layout)
 
- 
-
     def setup_background(self, layout):
         background = Image(
             source="fundoapp.png",  # imagem do quadro
@@ -132,11 +126,32 @@ class TelaInicial(Screen, ThemeManagerMixin):
             label.text = texto[:i]
             Clock.schedule_once(lambda dt: self.digita_texto(label, texto, i+1), 0.05)
 
-#Som botao
+    # Método chamado quando a tela se torna a tela atual
+    def on_enter(self, *args):
+        app = App.get_running_app()
+        # Carrega o som de fundo se ainda não foi carregado
+        if not hasattr(app, 'background_music') or app.background_music is None:
+            app.background_music = SoundLoader.load('stardew_valley.mp3') # Certifique-se de ter este arquivo
+        
+        if app.background_music:
+            app.background_music.loop = True # Faz o som tocar em loop
+            if app.sound_on and app.background_music.state != 'play':
+                app.background_music.play()
+
+    # Método chamado quando a tela deixa de ser a tela atual
+    def on_leave(self, *args):
+        app = App.get_running_app()
+        if hasattr(app, 'background_music') and app.background_music and app.background_music.state == 'play':
+            app.background_music.stop() # Para o som de fundo ao sair da tela inicial
+
+    # Som botao
     def tocar_som_giz(self):
-        som = SoundLoader.load("giz_riscando.wav")
-        if som:
-            som.play()
+        # Garante que o som só é reproduzido se estiver ligado globalmente
+        app = App.get_running_app()
+        if hasattr(app, 'sound_on') and app.sound_on:
+            som = SoundLoader.load("giz_riscando.wav")
+            if som:
+                som.play()
 
     def ir_para_selecao(self):
         self.manager.current = "seleciona"
@@ -155,7 +170,8 @@ class ImageButton(ButtonBehavior, Image):
         super().__init__(**kwargs)
         self.allow_stretch = True
         self.keep_ratio = True  # ou False, se quiser preencher total
-#classe do quadro
+
+# classe do quadro
 class Seleciona_Nivel(Screen, ThemeManagerMixin):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -200,10 +216,14 @@ class Seleciona_Nivel(Screen, ThemeManagerMixin):
         )
         layout.add_widget(btn_medio)
 
-# Variável para controlar o estado do som (ligado/desligado)
-        self.is_sound_on = True
+        # Variável para controlar o estado do som (ligado/desligado)
+        # Inicializa o estado do som do aplicativo globalmente
+        app = App.get_running_app()
+        if not hasattr(app, 'sound_on'): # Redundante, mas mantém a robustez
+            app.sound_on = True # Define o som como ligado por padrão
+        self.sound_click = SoundLoader.load('stardew_valley.mp3') # Carrega o som do clique do botão
 
-        #Botao de voltar
+        # Botão de voltar
         back_button = MDIconButton(
             icon='arrow-left',
             pos_hint={'x': 0, 'top': 1},
@@ -211,18 +231,18 @@ class Seleciona_Nivel(Screen, ThemeManagerMixin):
         )
         layout.add_widget(back_button)
 
-        self.add_widget(layout)
-
-   # Botão de som com cor e tamanho ajustados
+        # Botão de som com cor e tamanho ajustados
         self.sound_button = MDIconButton(
-            icon='volume-high',
-            pos_hint={'x': 0.9, 'top': 1},
+            icon='volume-high' if app.sound_on else 'volume-off', # Define o ícone inicial com base no estado global
+            pos_hint={'x': 0.93, 'top': 1},
             theme_text_color="Custom",
             text_color=(1, 1, 1, 1), # Cor branca
             icon_size=35, # Tamanho do ícone em pixels (ajuste como preferir)
-            on_release=lambda x: self.toggle_sound_icon()
+            on_release=self.toggle_sound_icon # Chama o método toggle_sound_icon
         )
-        layout.add_widget(self.sound_button) 
+        layout.add_widget(self.sound_button)
+
+        self.add_widget(layout)
 
     def animate_title(self, label):
         anim = Animation(opacity=0.7, duration=1) + Animation(opacity=1, duration=1)
@@ -269,16 +289,28 @@ class Seleciona_Nivel(Screen, ThemeManagerMixin):
         self.manager.transition = SlideTransition(direction="right", duration=0.4)
         self.manager.current = "inicial"
 
-    def toggle_sound_icon(self):
-        if self.sound_button.icon == 'volume-high':
+    def toggle_sound_icon(self, instance):
+        app = App.get_running_app()
+        if app.sound_on:
+            # Se o som estava ligado, desliga e muda o ícone para 'volume-off'
+            app.sound_on = False
             self.sound_button.icon = 'volume-off'
             print("Som Desligado")
+            # Para o som de fundo quando o som geral é desligado
+            if hasattr(app, 'background_music') and app.background_music:
+                app.background_music.stop()
         else:
+            # Se o som estava desligado, liga e muda o ícone para 'volume-high'
+            app.sound_on = True
             self.sound_button.icon = 'volume-high'
             print("Som Ligado")
+            # Toca o som de fundo quando o som geral é ligado, se não estiver tocando
+            if hasattr(app, 'background_music') and app.background_music and app.background_music.state != 'play':
+                app.background_music.play()
 
-
-
+        # Toca o som de clique do botão, independentemente do estado global de som
+        if self.sound_click:
+            self.sound_click.play()
 
 
 # Organizador de telas
